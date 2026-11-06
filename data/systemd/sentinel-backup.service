@@ -1,0 +1,10 @@
+[Unit]
+Description=Sentinel backup (one shot)
+# Runs the backup configured in ~/.config/sentinel/config.json without
+# opening the GUI. Install together with sentinel-backup.timer - see the
+# README ("Scheduled backups around the clock").
+
+[Service]
+Type=oneshot
+# %h expands to the user's home directory (user units only)
+ExecStart=%h/.local/bin/sentinel --backup-now

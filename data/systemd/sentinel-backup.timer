@@ -1,0 +1,12 @@
+[Unit]
+Description=Run the Sentinel backup every day at 03:00
+# Install into ~/.config/systemd/user/ together with the .service file,
+# then:  systemctl --user enable --now sentinel-backup.timer
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+# if the machine was off at 03:00, run as soon as possible after boot
+Persistent=true
+
+[Install]
+WantedBy=timers.target

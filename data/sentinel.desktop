@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Sentinel
+GenericName=Backup & System Monitor
+Comment=Back up your folders automatically and watch CPU, memory, disks and processes
+Exec=sentinel
+TryExec=sentinel
+Icon=sentinel
+Terminal=false
+Categories=System;Utility;FileTools;Archiving;
+StartupWMClass=sentinel
+Keywords=backup;rsync;monitor;system;task;manager;
