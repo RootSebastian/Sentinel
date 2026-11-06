@@ -10,9 +10,9 @@ from PyQt6 import sip
 from PyQt6.QtCore import Qt, QTimer, QUrl
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (QCheckBox, QFrame, QGridLayout, QHBoxLayout,
-                             QPushButton, QVBoxLayout, QWidget)
+                             QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
-from sentinel import __version__, config, theme
+from sentinel import __version__, config, theme, updater
 from sentinel.theme import THEMES, Pal, icon, mix
 from sentinel.widgets import Card, icon_label, label
 
@@ -90,9 +90,19 @@ class SettingsScreen(QWidget):
         self.win = win
         self.cfg = win.cfg
 
-        root = QVBoxLayout(self)
+        # the page scrolls when the window is short (or fonts are large),
+        # so the About card can never be pushed out of sight
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        page = QWidget()
+        root = QVBoxLayout(page)
         root.setContentsMargins(24, 20, 24, 20)
-        root.setSpacing(14)
+        root.setSpacing(10)
+        scroll.setWidget(page)
+        outer.addWidget(scroll)
 
         # ---- page header --------------------------------------------------
         head = QVBoxLayout()
@@ -131,6 +141,32 @@ class SettingsScreen(QWidget):
                         size=11, color=Pal.FAINT))
         root.addWidget(notif)
 
+        # ---- updates -------------------------------------------------------
+        upd = Card("Updates")
+        self.upd_cb = QCheckBox("Check for updates on startup")
+        self.upd_cb.setChecked(self.cfg.get("update_check", True))
+        self.upd_cb.toggled.connect(self._save_update_check)
+        upd.add(self.upd_cb)
+
+        upd_row = QHBoxLayout()
+        upd_row.setSpacing(8)
+        self.upd_status = label(f"Current version: v{__version__}", size=12,
+                                color=Pal.DIM, wrap=True)
+        upd_row.addWidget(self.upd_status, 1)
+        self.update_btn = QPushButton("Update now")
+        self.update_btn.hide()
+        self.update_btn.clicked.connect(self._apply_update)
+        upd_row.addWidget(self.update_btn)
+        self.check_btn = QPushButton("Check for updates")
+        self.check_btn.clicked.connect(self._check_updates)
+        upd_row.addWidget(self.check_btn)
+        upd.add(upd_row)
+        upd.add(label("Checks the GitHub repository for a newer release. "
+                      "One-click updates need a pip install; git checkouts "
+                      "are told to git pull instead.",
+                      size=11, color=Pal.FAINT, wrap=True))
+        root.addWidget(upd)
+
         # ---- about ---------------------------------------------------------
         about = Card("About")
         row = QHBoxLayout()
@@ -160,6 +196,12 @@ class SettingsScreen(QWidget):
         root.addStretch(1)
 
     # ------------------------------------------------------------- actions --
+    def _save_update_check(self, checked):
+        cfg = config.load()
+        cfg["update_check"] = bool(checked)
+        config.save(cfg)
+        self.cfg = cfg
+
     def _save_notifications(self, checked):
         cfg = config.load()
         cfg["notifications"] = bool(checked)
@@ -169,3 +211,35 @@ class SettingsScreen(QWidget):
     def _open_config_dir(self):
         os.makedirs(config.CONFIG_DIR, exist_ok=True)
         QDesktopServices.openUrl(QUrl.fromLocalFile(config.CONFIG_DIR))
+
+    # -------------------------------------------------------------- updates --
+    def _check_updates(self):
+        self.check_btn.setEnabled(False)
+        self.update_btn.hide()
+        self.upd_status.setText("Checking GitHub for updates…")
+        self._upd_bridge = updater.start_check(self._updates_checked)
+
+    def _updates_checked(self, info):
+        if sip.isdeleted(self):
+            return
+        self.check_btn.setEnabled(True)
+        self.update_btn.hide()
+        if info["error"]:
+            self.upd_status.setText(info["error"])
+            return
+        if not info["available"]:
+            self.upd_status.setText(
+                f"You're up to date - v{info['current']} is the latest.")
+            return
+        self.upd_status.setText(f"Version v{info['latest']} is available.")
+        if info["mode"] == "pip":
+            self._repo = info["repo"]
+            self.update_btn.show()
+        else:
+            updater.show_manual_update_dialog(self, info)
+
+    def _apply_update(self):
+        repo = getattr(self, "_repo", None) or updater.detect_repo()
+        self.update_btn.setEnabled(False)
+        self.upd_status.setText("Downloading and installing…")
+        self._upd_panel = updater.begin_update(self, repo)

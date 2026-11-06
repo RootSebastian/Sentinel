@@ -18,9 +18,10 @@ def main():
     if "--backup-now" in sys.argv[1:]:
         return headless_backup()
 
+    from PyQt6.QtCore import QTimer
     from PyQt6.QtWidgets import QApplication
 
-    from sentinel import theme
+    from sentinel import config, theme
     from sentinel.ui.main_window import MainWindow
 
     app = QApplication(sys.argv)
@@ -30,6 +31,13 @@ def main():
 
     win = MainWindow()
     win.show()
+
+    # quiet update check shortly after launch (silently skips when the
+    # user turned it off in Settings, and never complains when offline)
+    if config.load().get("update_check", True):
+        from sentinel import updater
+        QTimer.singleShot(1500, lambda: updater.startup_check(win))
+
     return app.exec()
 
 

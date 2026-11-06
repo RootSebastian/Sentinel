@@ -31,8 +31,8 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/sentinel"
-Issues = "https://github.com/YOUR_USERNAME/sentinel/issues"
+Homepage = "https://github.com/RootSebastian/sentinel"
+Issues = "https://github.com/RootSebastian/sentinel/issues"
 
 [project.scripts]
 sentinel = "sentinel.main:main"

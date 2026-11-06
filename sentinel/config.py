@@ -15,6 +15,7 @@ DEFAULTS = {
     "last_backup": None,       # ISO timestamp (UTC) of last completed run
     "onboarded": False,        # has the user finished the first-run wizard?
     "notifications": True,     # desktop notifications for backup results
+    "update_check": True,      # quietly check GitHub for new versions on startup
     "theme": "midnight",       # active color theme (see theme.THEMES)
 }
 

@@ -8,9 +8,10 @@ Package layout:
     theme.py           design system: 8 color themes, QSS, icons, fonts
     widgets.py         reusable cards, usage bars, option cards
     graphs.py          scrolling history graphs + sparklines
+    updater.py         GitHub version check + one-click self-update
     ui/                screens and the main window
     main.py            entry point (GUI + `--backup-now` headless mode)
 """
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 APP_NAME = "Sentinel"

@@ -4,6 +4,21 @@ All notable changes to Sentinel are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] - 2026-11-06
+
+### Added
+- **In-app updater** - Settings → Updates shows the installed version and
+  checks the GitHub repository for a newer release. pip installs get a
+  one-click *Update now* (download log included, restart prompt at the
+  end); git checkouts are shown the matching `git pull` command. The
+  check also runs quietly a moment after launch and can be turned off
+  with the new "Check for updates on startup" setting. It never blocks
+  the interface and stays silent when offline.
+- **Automatic release builds** - pushing a version tag
+  (`git tag v1.3.0 && git push origin v1.3.0`) makes CI run the tests,
+  package the zip and publish it as a GitHub Release.
+- README: install-straight-from-GitHub and updating instructions.
+
 ## [1.2.0] - 2026-11-06
 
 ### Added

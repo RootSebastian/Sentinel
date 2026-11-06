@@ -5,7 +5,7 @@ Thanks for considering a contribution!
 ## Getting set up
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/sentinel.git
+git clone https://github.com/RootSebastian/sentinel.git
 cd sentinel
 
 python -m venv .venv

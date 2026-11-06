@@ -32,6 +32,9 @@ processes — in one clean, themeable window. No terminals required.
   Rose Pine) and two light (Daylight, Paper), switching instantly.
 - **Friendly by design** — first-run wizard, desktop notifications through
   the system tray, keyboard shortcuts (`Ctrl+1…6`, `Ctrl+,`).
+- **In-app updates** — checks GitHub for new versions on launch, and
+  Settings → Updates can install them in one click (pip installs) or
+  tells git checkouts to `git pull`.
 - **Safe by construction** — restores and backups never delete data you
   didn't explicitly ask about; mirror mode always confirms first.
 
@@ -44,7 +47,7 @@ processes — in one clean, themeable window. No terminals required.
 ## Quick start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/sentinel.git
+git clone https://github.com/RootSebastian/sentinel.git
 cd sentinel
 
 python -m venv .venv && source .venv/bin/activate
@@ -65,6 +68,37 @@ pip install -e .          # adds the `sentinel` command
 
 `install.sh` is user-level — no root needed. Run `./install.sh --no-timer`
 to skip the scheduled-backup timer.
+
+### Installing straight from GitHub
+
+No download, no clone — one command (Python 3.9+ with pip):
+
+```bash
+pip install git+https://github.com/RootSebastian/sentinel.git
+sentinel
+```
+
+This is the recommended way to install Sentinel on a machine you don't
+develop on: it adds the `sentinel` command and lets the app update
+itself (see below).
+
+## Updating
+
+Sentinel checks for new versions on GitHub a moment after launch —
+quietly, and never when you're offline (it just skips).
+
+- **pip installs** (the `pip install git+…` route): a dialog offers
+  *Update now*; the download log is shown, then Sentinel offers to
+  restart into the new version. The same flow lives in
+  **Settings → Updates**.
+- **git clones / editable installs**: Sentinel shows the matching
+  `git pull` command instead.
+- Manual update at any time:
+  ```bash
+  pip install --upgrade git+https://github.com/RootSebastian/sentinel.git
+  ```
+
+The startup check can be turned off in **Settings → Updates**.
 
 ## Restoring your files
 
@@ -114,6 +148,21 @@ python tools/make_icon.py               # regenerate the app icon
 The test suite runs the real rsync engine against temporary folders and
 drives the actual UI offscreen — see `tests/` and `CONTRIBUTING.md`.
 
+### Publishing a release
+
+Version numbers live in `sentinel/__init__.py` (`__version__`) and must
+match the tag you push:
+
+```bash
+# bump __version__, update CHANGELOG.md, commit, then:
+git tag v1.2.1
+git push origin main --tags
+```
+
+CI runs the full test suite and, when the tag is `v*`, attaches
+`sentinel-v1.2.1.zip` to a new GitHub Release automatically — that zip
+is what people download from the Releases page.
+
 ### Project structure
 
 ```
@@ -122,6 +171,7 @@ sentinel/              the Python package
     history.py         backup run log (history.json)
     backup_engine.py   rsync wrapper + worker thread
     restore_engine.py  reverse rsync (bring files back)
+    updater.py         GitHub version check + one-click self-update
     theme.py           design system: themes, QSS, icons, fonts
     widgets.py         reusable styled widgets
     graphs.py          scrolling graphs + sparklines

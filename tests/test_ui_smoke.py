@@ -131,4 +131,4 @@ def test_theme_card_clicks_never_crash(win, qapp):
 
 def test_version_is_consistent(win):
     import sentinel
-    assert sentinel.__version__ == "1.2.0"
+    assert sentinel.__version__ == "1.2.1"
